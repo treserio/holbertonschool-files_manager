@@ -13,13 +13,13 @@ class RedisClient {
     return this.cli.connected;
   }
 
-  get(key) {
-    this.cli.get(key, (err, data) => this.g = data);
+  async get(key) {
+    await this.cli.get(key, (err, data) => { this.g = data; });
     return this.g;
   }
 
   set(key, value, duration) {
-    this.cli.set(key, value, 'EX', duration)
+    this.cli.set(key, value, 'EX', duration);
     return value;
   }
 
