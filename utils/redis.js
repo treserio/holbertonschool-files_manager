@@ -6,7 +6,7 @@ class RedisClient {
     this.cli
       .on('error', (e) => console.log('Client Error:', e))
       .on('connect', () => console.log('redis-connected'));
-    this.g = NaN;
+    this.g = null;
   }
 
   isAlive() {
