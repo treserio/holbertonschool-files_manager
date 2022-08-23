@@ -13,7 +13,7 @@ class AppController {
     const users = await Mongo.nbUsers();
     const files = await Mongo.nbFiles();
     return res.status(200).json({ users, files });
-  };
+  }
 }
 
 module.exports = AppController;
