@@ -1,4 +1,5 @@
 const redis = require('redis');
+const { promisify } = require('util');
 
 class RedisClient {
   constructor() {
@@ -14,16 +15,15 @@ class RedisClient {
   }
 
   async get(key) {
-    await this.cli.get(key, (err, data) => { this.g = data; });
-    return this.g;
+    return promisify(this.cli.get).bind(this.cli)(key);
   }
 
-  set(key, value, duration) {
+  async set(key, value, duration) {
     this.cli.set(key, value, 'EX', duration);
     return value;
   }
 
-  del(key) {
+  async del(key) {
     this.cli.del(key);
   }
 }
