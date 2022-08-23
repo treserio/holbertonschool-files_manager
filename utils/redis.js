@@ -7,7 +7,6 @@ class RedisClient {
     this.cli
       .on('error', (e) => console.log('Client Error:', e))
       .on('connect', () => console.log('redis-connected'));
-    this.g = null;
   }
 
   isAlive() {
@@ -28,5 +27,4 @@ class RedisClient {
   }
 }
 
-const redisClient = new RedisClient();
-module.exports = redisClient;
+module.exports = new RedisClient();
