@@ -1,8 +1,8 @@
 const mon = require('mongodb');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const Mongo = require('../utils/db');
 const Redis = require('../utils/redis');
-const userCon = require('./UsersController');
 
 class FilesController {
   static async addFile(req, res) {
@@ -25,17 +25,18 @@ class FilesController {
     }
     // parentId is expected to return an object of type: folder
     if (parentId) {
-      const file = await Mongo.files.findOne({ _id: new mongo.ObjectID(parentId) });
+      const file = await Mongo.files.findOne({ _id: new mon.ObjectID(parentId) });
 
       if (!file) return res.status(400).json({ error: 'Parent not found' });
       if (file.type !== 'folder') {
         return res.status(400).json({ error: 'Parent is not a folder' });
       }
     }
+    let addedFile;
     // if type == folder, add folder else process file
     if (type === 'folder') {
       addedFile = await Mongo.files.insertOne({
-        userId: new mongo.ObjectId(userId),
+        userId: new mon.ObjectId(userId),
         name,
         type,
         isPublic,
@@ -55,7 +56,7 @@ class FilesController {
       await fs.promises.writeFile(filePath, decode);
       // insert new file info into mongodb
       addedFile = await Mongo.files.insertOne({
-        userId: new mongo.ObjectId(userId),
+        userId: new mon.ObjectId(userId),
         name,
         type,
         isPublic,
@@ -72,12 +73,7 @@ class FilesController {
       isPublic,
       parentId,
     });
-    }
-
-    // ().catch((err) => {
-    //   console.log(err);
-    //   return res.status(500).json({ error: err.toString() });
-    // });
+  }
 }
 
 module.exports = FilesController;
