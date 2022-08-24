@@ -4,7 +4,7 @@ const Mongo = require('../utils/db');
 const Redis = require('../utils/redis');
 
 class UsersController {
-  static async postNew(req, res) {
+  static async addUser(req, res) {
     // pull values from req's json data
     const { email, password } = req.body;
     // confirm email exists & password were sent in req
