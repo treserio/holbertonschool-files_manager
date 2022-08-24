@@ -12,7 +12,10 @@ class AuthController {
     // pull the email and the password out of the string
     const [email, pass] = auth.split(':');
     // check authorization of user to continue
-    const user = await Mongo.users.findOne({ email, password: sha1(pass) });
+    const user = await Mongo.users.findOne({
+      email,
+      password: pass ? sha1(pass) : null,
+    });
     if (!user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }

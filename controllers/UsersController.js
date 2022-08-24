@@ -1,6 +1,6 @@
 const sha1 = require('sha1');
-const mongo = require('mongodb');
-const mongoCli = require('../utils/db');
+const mon = require('mongodb');
+const Mongo = require('../utils/db');
 const Redis = require('../utils/redis');
 
 class UsersController {
@@ -11,9 +11,9 @@ class UsersController {
     if (!email) return res.status(400).json({ error: 'Missing email' });
     if (!password) return res.status(400).json({ error: 'Missing password' });
     // check if the user's email exists
-    if (await mongoCli.users.findOne({ email })) return res.status(400).json({ error: 'Already exist' });
+    if (await Mongo.users.findOne({ email })) return res.status(400).json({ error: 'Already exist' });
     // create new user with sha1 hashed pw
-    const newUser = await mongoCli.users.insertOne({
+    const newUser = await Mongo.users.insertOne({
       email,
       password: sha1(password),
     });
@@ -25,8 +25,8 @@ class UsersController {
     const authToken = `auth_${req.headers['x-token']}`;
     const userId = await Redis.get(authToken);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-    // grab our user and return { id, email }, convert to ObjectId
-    const user = await mongoCli.users.findOne({ _id: new mongo.ObjectId(userId) });
+    // grab our user and return { id, email }, convert userId to ObjectId
+    const user = await Mongo.users.findOne({ _id: new mon.ObjectId(userId) });
     return res.status(200).json({ id: user._id, email: user.email });
   }
 }
