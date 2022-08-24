@@ -6,10 +6,10 @@ class UsersController {
     // pull values from req's json data
     const { email, password } = req.body;
     // confirm email exists & password were sent in req
-    if (!email) return res.status(400).send('{"error": "Missing email"}');
-    if (!password) return res.status(400).send('{"error": "Missing password"}');
+    if (!email) return res.status(400).json({ error: 'Missing email' });
+    if (!password) return res.status(400).json({ error: 'Missing password' });
     // check if the user's email exists
-    if (await Mongo.users.findOne({ email })) return res.status(400).send('{"error": "Already exist"}');
+    if (await Mongo.users.findOne({ email })) return res.status(400).json({ error: 'Already exist' });
     // create new user with sha1 hashed pw
     const newUser = await Mongo.users.insertOne({
       email,
