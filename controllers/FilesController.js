@@ -7,8 +7,8 @@ const Redis = require('../utils/redis');
 class FilesController {
   static async addFile(req, res) {
     const authToken = `auth_${req.headers['x-token']}`;
-    const userId = await Redis.get(authToken);
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const id = await Redis.get(authToken);
+    if (!id) return res.status(401).json({ error: 'Unauthorized' });
     // pull data from the request, 2 values have defaults if not present
     const {
       name,
@@ -33,10 +33,11 @@ class FilesController {
       }
     }
     let addedFile;
+    const userId = mon.ObjectId(id);
     // if type == folder, add folder else process file
     if (type === 'folder') {
       addedFile = await Mongo.files.insertOne({
-        userId: new mon.ObjectId(userId),
+        userId,
         name,
         type,
         isPublic,
@@ -56,7 +57,7 @@ class FilesController {
       await fs.promises.writeFile(filePath, decode);
       // insert new file info into mongodb
       addedFile = await Mongo.files.insertOne({
-        userId: new mon.ObjectId(userId),
+        userId,
         name,
         type,
         isPublic,
