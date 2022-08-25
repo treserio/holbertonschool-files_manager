@@ -123,13 +123,12 @@ class FilesController {
   static async getFileData(req, res) {
     // confirm the user is authorized, "connected"
     const userId = await Redis.get(`auth_${req.headers['x-token']}`);
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     // find a file based on the id parameter sent
     const { id } = req.params;
     const file = await Mongo.files.findOne({ _id: new mon.ObjectID(id) });
     // confirm the file is present and tied to the user
     // eslint-disable-next-line
-    if (!file || !userId || (userId != file.userId && !file.isPublic)) {
+    if (!file || (!file.isPublic && (!userId || userId != file.userId))) {
       return res.status(404).json({ error: 'Not found' });
     }
     // confirm the requested file is not a folder
