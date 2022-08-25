@@ -6,6 +6,7 @@ const Redis = require('../utils/redis');
 
 class FilesController {
   static async addFile(req, res) {
+    // confirm the user is authorized, "connected"
     const id = await Redis.get(`auth_${req.headers['x-token']}`);
     if (!id) return res.status(401).json({ error: 'Unauthorized' });
     // pull data from the request, 2 values have defaults if not present
@@ -93,8 +94,8 @@ class FilesController {
     // confirm the user is authorized, "connected"
     const userId = await Redis.get(`auth_${req.headers['x-token']}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-    // grab values from query params, defaults are 0
-    const { parentId = 0, page = 0 } = req.query;
+    // grab values from query params, default page to 0
+    const { parentId, page = 0 } = req.query;
     let fileList;
     if (parentId) {
       fileList = await Mongo.files.aggregate([
@@ -109,7 +110,38 @@ class FilesController {
         { $limit: 20 },
       ]).toArray();
     }
-    return res.json(fileList);
+    return res.json(fileList.map((file) => ({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    })));
+  }
+
+  static async putPublish(req, res) {
+    // confirm the user is authorized, "connected"
+    const userId = await Redis.get(`auth_${req.headers['x-token']}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    const file = await Mongo.files.findOne({ _id: new mon.ObjectID(id) });
+    // confirm the file is present and tied to the user
+    // eslint-disable-next-line
+    if (!file || userId != file.userId) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    file.isPublic = true;
+
+    return res.status(200).send({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    });
   }
 }
 
