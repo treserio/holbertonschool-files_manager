@@ -27,7 +27,7 @@ class UsersController {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     // grab our user and return { id, email }, convert userId to ObjectId
     const user = await Mongo.users.findOne({ _id: new mon.ObjectId(userId) });
-    return res.status(200).json({ id: user._id, email: user.email });
+    return res.json({ id: user._id, email: user.email });
   }
 }
 

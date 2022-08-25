@@ -81,11 +81,35 @@ class FilesController {
     const fileId = new mon.ObjectId(req.params.id);
     const file = await Mongo.files.findOne({ _id: fileId });
     // confirm the file is present and tied to the user
+    // eslint-disable-next-line
     if (!file || userId != file.userId) {
       return res.status(404).json({ error: 'Not found' });
     }
     // return the file info
-    return res.status(200).json({ ...file });
+    return res.json({ ...file });
+  }
+
+  static async getFiles(req, res) {
+    // confirm the user is authorized, "connected"
+    const userId = await Redis.get(`auth_${req.headers['x-token']}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    // grab values from query params, defaults are 0
+    const { parentId = 0, page = 0 } = req.query;
+    let fileList;
+    if (parentId) {
+      fileList = await Mongo.files.aggregate([
+        { $match: { parentId: new mon.ObjectID(parentId) } },
+        { $skip: page * 20 },
+        { $limit: 20 },
+      ]).toArray();
+    } else {
+      fileList = await Mongo.files.aggregate([
+        { $match: { userId: new mon.ObjectID(userId) } },
+        { $skip: page * 20 },
+        { $limit: 20 },
+      ]).toArray();
+    }
+    return res.json(fileList);
   }
 }
 
