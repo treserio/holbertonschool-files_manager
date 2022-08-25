@@ -129,7 +129,7 @@ class FilesController {
     const file = await Mongo.files.findOne({ _id: new mon.ObjectID(id) });
     // confirm the file is present and tied to the user
     // eslint-disable-next-line
-    if (!file || (userId != file.userId && !file.isPublic)) {
+    if (!file || !userId || (userId != file.userId && !file.isPublic)) {
       return res.status(404).json({ error: 'Not found' });
     }
     // confirm the requested file is not a folder
