@@ -20,4 +20,8 @@ router.get('/files', FilesCon.getFiles);
 router.post('/users', UserCon.addUser);
 router.post('/files', FilesCon.addFile);
 
+// PUTS
+router.put('/files/:id/publish', FilesCon.setPublic);
+router.put('/files/:id/unpublish', FilesCon.setPrivate);
+
 module.exports = router;

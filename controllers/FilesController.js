@@ -120,11 +120,11 @@ class FilesController {
     })));
   }
 
-  static async putPublish(req, res) {
+  static async setPublic(req, res) {
     // confirm the user is authorized, "connected"
     const userId = await Redis.get(`auth_${req.headers['x-token']}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
+    // find a file based on the id parameter sent
     const { id } = req.params;
     const file = await Mongo.files.findOne({ _id: new mon.ObjectID(id) });
     // confirm the file is present and tied to the user
@@ -133,15 +133,39 @@ class FilesController {
       return res.status(404).json({ error: 'Not found' });
     }
     file.isPublic = true;
+    return res.json({ ...file });
+    // return res.status(200).send({
+    //   id: file._id,
+    //   userId: file.userId,
+    //   name: file.name,
+    //   type: file.type,
+    //   isPublic: file.isPublic,
+    //   parentId: file.parentId,
+    // });
+  }
 
-    return res.status(200).send({
-      id: file._id,
-      userId: file.userId,
-      name: file.name,
-      type: file.type,
-      isPublic: file.isPublic,
-      parentId: file.parentId,
-    });
+  static async setPrivate(req, res) {
+    // confirm the user is authorized, "connected"
+    const userId = await Redis.get(`auth_${req.headers['x-token']}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    // find a file based on the id parameter sent
+    const { id } = req.params;
+    const file = await Mongo.files.findOne({ _id: new mon.ObjectID(id) });
+    // confirm the file is present and tied to the user
+    // eslint-disable-next-line
+    if (!file || userId != file.userId) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    file.isPublic = false;
+    return res.json({ ...file });
+    // return res.status(200).send({
+    //   id: file._id,
+    //   userId: file.userId,
+    //   name: file.name,
+    //   type: file.type,
+    //   isPublic: file.isPublic,
+    //   parentId: file.parentId,
+    // });
   }
 }
 
