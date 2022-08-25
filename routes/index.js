@@ -15,6 +15,7 @@ router.get('/disconnect', AuthCon.userDisconnect);
 router.get('/users/me', UserCon.getUser);
 router.get('/files/:id', FilesCon.getFile);
 router.get('/files', FilesCon.getFiles);
+router.get('/files/:id/data', FilesCon.getFileData);
 
 // POSTS
 router.post('/users', UserCon.addUser);
