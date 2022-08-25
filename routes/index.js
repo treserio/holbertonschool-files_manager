@@ -13,6 +13,7 @@ router.get('/stats', AppCon.getStats);
 router.get('/connect', AuthCon.userConnect);
 router.get('/disconnect', AuthCon.userDisconnect);
 router.get('/users/me', UserCon.getUser);
+router.get('/files/:id', FilesCon.getFile);
 
 // POSTS
 router.post('/users', UserCon.addUser);

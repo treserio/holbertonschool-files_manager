@@ -6,8 +6,7 @@ const Redis = require('../utils/redis');
 
 class FilesController {
   static async addFile(req, res) {
-    const authToken = `auth_${req.headers['x-token']}`;
-    const id = await Redis.get(authToken);
+    const id = await Redis.get(`auth_${req.headers['x-token']}`);
     if (!id) return res.status(401).json({ error: 'Unauthorized' });
     // pull data from the request, 2 values have defaults if not present
     const {
@@ -26,7 +25,6 @@ class FilesController {
     // parentId is expected to return an object of type: folder
     if (parentId) {
       const file = await Mongo.files.findOne({ _id: new mon.ObjectID(parentId) });
-
       if (!file) return res.status(400).json({ error: 'Parent not found' });
       if (file.type !== 'folder') {
         return res.status(400).json({ error: 'Parent is not a folder' });
@@ -65,7 +63,6 @@ class FilesController {
         filePath,
       });
     }
-
     return res.status(201).json({
       id: addedFile.insertedId,
       userId,
@@ -74,6 +71,21 @@ class FilesController {
       isPublic,
       parentId,
     });
+  }
+
+  static async getFile(req, res) {
+    // confirm the user is authorized, "connected"
+    const userId = await Redis.get(`auth_${req.headers['x-token']}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    // grab the file matching the id provided
+    const fileId = new mon.ObjectId(req.params.id);
+    const file = await Mongo.files.findOne({ _id: fileId });
+    // confirm the file is present and tied to the user
+    if (!file || userId != file.userId) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    // return the file info
+    return res.status(200).json({ ...file });
   }
 }
 
